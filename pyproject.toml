@@ -1,0 +1,11 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "py-text-gen"
+authors = [{name = "Belreau Cohen", email = "nuu.chah.nulth@disroot.org"}]
+dynamic = ["version", "description"]
+
+# [project.urls]
+# Home = ""
