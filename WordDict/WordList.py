@@ -8,15 +8,15 @@ class WordList():
     parts_of_speech = {
         'сущ': (FormKeepers.NumFormKeeper, FormKeepers.CaseFormKeeper),
         'пр': (FormKeepers.NumFormKeeper, FormKeepers.GenderFormKeeper),
-        'гл': (FormKeepers.TimeFormKeeper, FormKeepers.NumFormKeeper, FormKeepers.PersonFormKeeper),
+        'гл': (FormKeepers.GenderFormKeeper, FormKeepers.NumFormKeeper, FormKeepers.PersonFormKeeper, FormKeepers.TimeFormKeeper),
         'нар': (),
         None: ()
     }
-    
+
     word_types = ('безл.', 'нескл.')
-    
-    word_traits = ('абр', 'пинг', 'перс')
-    
+
+    word_traits = ('абр', 'пинг', 'перс', 'сов.', 'несов.')
+
     def __init__(self):
         self.forms = dict()
         self.tags = dict()
@@ -35,8 +35,8 @@ class WordList():
 
     def insert(self, name, tags):
         keepers = list(self.parts_of_speech[extract_any(tags, *self.parts_of_speech.keys())])
-        
-        types = extract_all(tags, self.word_types, to_pop=True)
+
+        types = extract_all(tags, *self.word_types, to_pop=True)
         for word_type in types:
             match word_type:
                 case 'безл.':
@@ -45,7 +45,7 @@ class WordList():
                     safe_remove(keepers, FormKeepers.CaseFormKeeper)
                     safe_remove(keepers, FormKeepers.NumFormKeeper)
 
-        traits = extract_all(tags, self.word_traits, to_pop=False)
+        traits = extract_all(tags, *self.word_traits, to_pop=False)
         for trait in traits:
             match trait:
                 case 'абр':
@@ -54,7 +54,13 @@ class WordList():
                     keepers.clear()
                 case 'перс':
                     safe_remove(keepers, FormKeepers.NumFormKeeper)
-        
+                case 'сов.':
+                    safe_remove(keepers, FormKeepers.TimeFormKeeper)
+                    keepers.append(FormKeepers.PerfectTimeFormKeeper)
+                case 'несов.':
+                    safe_remove(keepers, FormKeepers.TimeFormKeeper)
+                    keepers.append(FormKeepers.ImperfectTimeFormKeeper)
+
         if len(keepers) == 0:
             self.forms[name] = name
         else:
@@ -62,7 +68,7 @@ class WordList():
             for keeper in keepers[1:]:
                 forms.split(keeper)
             print('Введите для каждой формы корректное слово:')
-            forms.settle()
+            forms.settle(key=name)
             self.forms[name] = forms
 
         self.tags[name] = tags

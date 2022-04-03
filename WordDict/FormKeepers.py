@@ -1,4 +1,4 @@
-from .Util.Util import extract_any
+from .Util.Util import extract_any, extract_all
 
 
 class BaseFormKeeper():
@@ -19,18 +19,21 @@ class BaseFormKeeper():
         
         for _, holder in self.rooms_dict.items():
             holder.split(keeper)
+    
+    def inhabit(self, path = (), rooms = rooms, *, key: str):
+        for room in rooms:
+            for node in path:
+                print(f'{node}/', end='')
+            print(f'{room}: ', end='')
+            self.rooms_dict[room] = input()
 
-    def settle(self, path = ()):
+    def settle(self, path = (), *, key: str):
         if not self.is_settled:
-            for room in self.rooms:
-                for node in path:
-                    print(f'{node}/', end='')
-                print(f'{room}: ', end='')
-                self.rooms_dict[room] = input()
+            self.inhabit(path, key=key)
             return
 
         for room, holder in self.rooms_dict.items():
-            holder.settle(path + (room, ))
+            holder.settle(path + (room, ), key=key)
 
     def struct(self, path = ()):
         if not self.is_settled:
@@ -69,6 +72,32 @@ class TimeFormKeeper(BaseFormKeeper):
             return key
 
         return super().accept(*args, key)
+
+
+class PerfectTimeFormKeeper(TimeFormKeeper):
+    rooms = ('п.в.', 'б.в.')
+    default = rooms[0]
+    name = 'Время'
+
+
+class ImperfectTimeFormKeeper(TimeFormKeeper):
+    rooms = ('п.в.', 'н.в.', 'б.в.')
+    default = rooms[1]
+    name = 'Время'
+    
+    def inhabit(self, path=(), rooms=list(rooms), *, key: str):
+        if 'б.в.' in rooms:
+            rooms.remove('б.в.')
+            person_num_pair = extract_all(path, 'ед.ч.', 'мн.ч.', '1л', '2л', '3л')
+            match person_num_pair:
+                case ('ед.ч.', '1л'): self.rooms_dict['б.в.'] = 'буду ' + key
+                case ('мн.ч.', '1л'): self.rooms_dict['б.в.'] = 'будем ' + key
+                case ('ед.ч.', '2л'): self.rooms_dict['б.в.'] = 'будешь ' + key
+                case ('мн.ч.', '2л'): self.rooms_dict['б.в.'] = 'будете ' + key
+                case ('ед.ч.', '3л'): self.rooms_dict['б.в.'] = 'будет ' + key
+                case ('мн.ч.', '3л'): self.rooms_dict['б.в.'] = 'будут ' + key
+
+        super().inhabit(path, rooms, key=key)
 
 
 class PersonFormKeeper(BaseFormKeeper):
