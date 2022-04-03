@@ -5,7 +5,7 @@ class BaseFormKeeper():
     rooms = ('', )
     default = rooms[0]
     name = ''
-    
+
     def __init__(self):
         self.rooms_dict = dict()
         self.is_settled = False
@@ -15,30 +15,29 @@ class BaseFormKeeper():
             self.is_settled = True
             for room in self.rooms:
                 self.rooms_dict[room] = keeper()
-                return
+            return
         
-        for _, holder in self.rooms_dict:
+        for _, holder in self.rooms_dict.items():
             holder.split(keeper)
 
     def settle(self, path = ()):
         if not self.is_settled:
-            print('Введите для каждой формы корректное слово:')
             for room in self.rooms:
                 for node in path:
                     print(f'{node}/', end='')
                 print(f'{room}: ', end='')
                 self.rooms_dict[room] = input()
-                return
-        
-        for room, holder in self.rooms_dict:
+            return
+
+        for room, holder in self.rooms_dict.items():
             holder.settle(path + (room, ))
-    
+
     def struct(self, path = ()):
         if not self.is_settled:
             return path + (self.name, )
-        
+
         return self.struct(self.rooms_dict[self.default], path + (self.name, ))
-        
+
     def accept(self, *args, key: str):
         room = extract_any(args, *self.rooms, if_none=self.default)
 

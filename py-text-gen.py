@@ -8,8 +8,8 @@ def main():
     db = WordList()
     tokens = input().split(sep=' ')
     name = tokens[0]
-    args = tokens[1:]
-    db.insert(name, args)
+    tags = tokens[1:]
+    db.insert(name, tags)
 
 if __name__ == '__main__':
     main()

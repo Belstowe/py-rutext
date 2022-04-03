@@ -8,7 +8,7 @@ class WordList():
     parts_of_speech = {
         'сущ': (FormKeepers.NumFormKeeper, FormKeepers.CaseFormKeeper),
         'пр': (FormKeepers.NumFormKeeper, FormKeepers.GenderFormKeeper),
-        'гл': (FormKeepers.TimeFormKeeper, FormKeepers.PersonFormKeeper),
+        'гл': (FormKeepers.TimeFormKeeper, FormKeepers.NumFormKeeper, FormKeepers.PersonFormKeeper),
         'нар': (),
         None: ()
     }
@@ -33,9 +33,8 @@ class WordList():
         )
         return random.choice(tag_correlations)
 
-    def insert(self, name, *args):
-        tags = list(args)
-        keepers = list(self.parts_of_speech[extract_any(tags, self.parts_of_speech.keys())])
+    def insert(self, name, tags):
+        keepers = list(self.parts_of_speech[extract_any(tags, *self.parts_of_speech.keys())])
         
         types = extract_all(tags, self.word_types, to_pop=True)
         for word_type in types:
@@ -59,9 +58,11 @@ class WordList():
         if len(keepers) == 0:
             self.forms[name] = name
         else:
-            self.forms[name] = keepers[0]
+            forms = keepers[0]()
             for keeper in keepers[1:]:
-                self.forms[name].split(keeper)
-            self.forms[name].settle()
-        
-        self.tags[name] = args
+                forms.split(keeper)
+            print('Введите для каждой формы корректное слово:')
+            forms.settle()
+            self.forms[name] = forms
+
+        self.tags[name] = tags
