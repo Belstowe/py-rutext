@@ -1,21 +1,13 @@
-from .Util.Util import extract_any, extract_all, safe_remove
+from .Util.Util import extract_any, extract_all
 from . import FormKeepers
 import random
 
 
 class WordList():
-    
-    parts_of_speech = {
-        'сущ': (FormKeepers.NumFormKeeper, FormKeepers.CaseFormKeeper),
-        'пр': (FormKeepers.NumFormKeeper, FormKeepers.GenderFormKeeper),
-        'гл': (FormKeepers.GenderFormKeeper, FormKeepers.NumFormKeeper, FormKeepers.PersonFormKeeper, FormKeepers.TimeFormKeeper),
-        'нар': (),
-        None: ()
-    }
 
-    word_types = ('безл.', 'нескл.')
+    word_types = ('безл.')
 
-    word_traits = ('абр', 'пинг', 'перс', 'сов.', 'несов.')
+    word_traits = ('абр', 'пинг', 'перс')
 
     def __init__(self):
         self.forms = dict()
@@ -34,41 +26,19 @@ class WordList():
         return random.choice(tag_correlations)
 
     def insert(self, name, tags):
-        keepers = list(self.parts_of_speech[extract_any(tags, *self.parts_of_speech.keys())])
-
         types = extract_all(tags, *self.word_types, to_pop=True)
         for word_type in types:
             match word_type:
                 case 'безл.':
                     tags.extend('м.р.', 'ж.р.')
-                case 'нескл.':
-                    safe_remove(keepers, FormKeepers.CaseFormKeeper)
-                    safe_remove(keepers, FormKeepers.NumFormKeeper)
 
         traits = extract_all(tags, *self.word_traits, to_pop=False)
-        for trait in traits:
-            match trait:
-                case 'абр':
-                    keepers.clear()
-                case 'пинг':
-                    keepers.clear()
+        for word_trait in traits:
+            match word_trait:
+                case 'абр' | 'пинг':
+                    tags.extend('нескл.')
                 case 'перс':
-                    safe_remove(keepers, FormKeepers.NumFormKeeper)
-                case 'сов.':
-                    safe_remove(keepers, FormKeepers.TimeFormKeeper)
-                    keepers.append(FormKeepers.PerfectTimeFormKeeper)
-                case 'несов.':
-                    safe_remove(keepers, FormKeepers.TimeFormKeeper)
-                    keepers.append(FormKeepers.ImperfectTimeFormKeeper)
+                    tags.extend('ед.ч.')
 
-        if len(keepers) == 0:
-            self.forms[name] = name
-        else:
-            forms = keepers[0]()
-            for keeper in keepers[1:]:
-                forms.split(keeper)
-            print('Введите для каждой формы корректное слово:')
-            forms.settle(key=name)
-            self.forms[name] = forms
-
+        self.forms[name] = FormKeepers.BaseFormKeeper(name, *tags)
         self.tags[name] = tags
