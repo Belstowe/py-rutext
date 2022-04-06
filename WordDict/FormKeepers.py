@@ -14,16 +14,16 @@ class FormKeeper():
         return input()
 
     def accept(self, *args):
-        for key, value in self.rooms.values():
+        for key, value in self.rooms.items():
             if key in args:
                 if type(value) is str:
                     return value
-                return value.accept(args)
+                return value.accept(*args)
 
         value = self.rooms[self.default_key]
         if type(value) is str:
             return value
-        return value.accept(args)
+        return value.accept(*args)
 
 
 class BaseFormKeeper(FormKeeper):
@@ -37,17 +37,17 @@ class BaseFormKeeper(FormKeeper):
 
             self.rooms['инф.'] = word
             self.rooms['пов.'] = VerbImperativeFormKeeper(word, path=path + ('Повелительное наклонение', ))
-            self.rooms[self.default_key] = VerbConjugableFormKeeper(word, args, path=path)
+            self.rooms[self.default_key] = VerbConjugableFormKeeper(word, *args, path=path)
         elif 'сущ.' in args:
             if 'нескл.' in args:
                 self.rooms[self.default_key] = word
             else:
-                self.rooms[self.default_key] = NounDeclinedFormKeeper(word, args, path=path)
+                self.rooms[self.default_key] = NounDeclinedFormKeeper(word, *args, path=path)
         elif 'пр.' in args:
             # self.default_key = 'ед.ч.'
             # self.rooms['ед.ч.'] = AdjSingularFormKeeper(word, args, path=path + ('Единственное число', ))
             # self.rooms['мн.ч.'] = AdjPluralFormKeeper(word, args, path=path + ('Множественное число', ))
-            self.rooms[self.default_key] = NounDeclinedFormKeeper(word, args, path=path)
+            self.rooms[self.default_key] = NounDeclinedFormKeeper(word, *args, path=path)
         else:
             self.rooms[self.default_key] = word
 
@@ -68,9 +68,9 @@ class VerbConjugableFormKeeper(FormKeeper):
         self.rooms[self.default_key] = word
 
         self.rooms['п.в.'] = VerbPastTimeFormKeeper(word, path=path + ('Прошедшее время', ))
-        self.rooms['б.в.'] = VerbTimeFormKeeper(word, args, path=path + ('Будущее время', ))
+        self.rooms['б.в.'] = VerbTimeFormKeeper(word, *args, path=path + ('Будущее время', ))
         if 'несов.' in args:
-            self.rooms['н.в.'] = VerbTimeFormKeeper(word, args, path=path + ('Настоящее время', ))
+            self.rooms['н.в.'] = VerbTimeFormKeeper(word, *args, path=path + ('Настоящее время', ))
 
 
 class VerbPastTimeFormKeeper(FormKeeper):
@@ -93,16 +93,16 @@ class VerbTimeFormKeeper(FormKeeper):
 
         self.rooms[self.default_key] = word
         
-        self.rooms['1л'] = VerbPersonFormKeeper(word, args, path=path + ('первое лицо', ))
-        self.rooms['2л'] = VerbPersonFormKeeper(word, args, path=path + ('второе лицо', ))
-        self.rooms['3л'] = VerbPersonFormKeeper(word, args, path=path + ('третье лицо', ))
+        self.rooms['1л'] = VerbPersonFormKeeper(word, *args, path=path + ('первое лицо', ))
+        self.rooms['2л'] = VerbPersonFormKeeper(word, *args, path=path + ('второе лицо', ))
+        self.rooms['3л'] = VerbPersonFormKeeper(word, *args, path=path + ('третье лицо', ))
 
 
 class VerbPersonFormKeeper(FormKeeper):
     def __init__(self, word: str, *args, path=()):
         super().__init__()
 
-        self.rooms[self.default_key] = word
+        self.default_key = 'ед.ч.'
 
         if 'несов.' in args and 'Будущее время' in path:
             if 'первое лицо' in path:
@@ -128,12 +128,12 @@ class NounDeclinedFormKeeper(FormKeeper):
 
         self.default_key = 'и.п.'
 
-        self.rooms['и.п.'] = NounCaseFormKeeper(word, args, path=path + ('Именительный падеж', ))
-        self.rooms['р.п.'] = NounCaseFormKeeper(word, args, path=path + ('Родительный падеж', ))
-        self.rooms['д.п.'] = NounCaseFormKeeper(word, args, path=path + ('Дательный падеж', ))
-        self.rooms['в.п.'] = NounCaseFormKeeper(word, args, path=path + ('Винительный падеж', ))
-        self.rooms['т.п.'] = NounCaseFormKeeper(word, args, path=path + ('Творительный падеж', ))
-        self.rooms['п.п.'] = NounCaseFormKeeper(word, args, path=path + ('Предложный падеж', ))
+        self.rooms['и.п.'] = NounCaseFormKeeper(word, *args, path=path + ('Именительный падеж', ))
+        self.rooms['р.п.'] = NounCaseFormKeeper(word, *args, path=path + ('Родительный падеж', ))
+        self.rooms['д.п.'] = NounCaseFormKeeper(word, *args, path=path + ('Дательный падеж', ))
+        self.rooms['в.п.'] = NounCaseFormKeeper(word, *args, path=path + ('Винительный падеж', ))
+        self.rooms['т.п.'] = NounCaseFormKeeper(word, *args, path=path + ('Творительный падеж', ))
+        self.rooms['п.п.'] = NounCaseFormKeeper(word, *args, path=path + ('Предложный падеж', ))
 
 
 class NounCaseFormKeeper(FormKeeper):

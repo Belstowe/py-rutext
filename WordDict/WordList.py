@@ -19,11 +19,26 @@ class WordList():
             del self.tags[name]
     
     def get(self, *args):
-        tag_correlations = list(
-            filter(lambda word_tags: all(tag in args for tag in word_tags[1]),
-                   self.tags.items())
-        )
-        return random.choice(tag_correlations)
+        tags = list(args)
+
+        forms = []
+
+        if 'гл.' in args:
+            forms = extract_all(tags, 'ед.ч.', 'мн.ч.', '1л', '2л', '3л', 'инф.', 'пов.', 'м.р.', 'с.р.', 'ж.р.', 'п.в.', 'н.в.', 'б.в.', to_pop=True)
+        elif 'сущ.' in args:
+            forms = extract_all(tags, 'ед.ч.', 'мн.ч.', 'и.п.', 'р.п.', 'д.п.', 'в.п.', 'т.п.', 'п.п.', to_pop=True)
+        elif 'пр.' in args:
+            forms = extract_all(tags, 'ед.ч.', 'мн.ч.', 'и.п.', 'р.п.', 'д.п.', 'в.п.', 'т.п.', 'п.п.', to_pop=True)
+
+        tag_correlations = tuple(filter(lambda word_tags: all(tag in word_tags[1] for tag in tags), self.tags.items()))
+
+        if len(tag_correlations) == 0:
+            return
+
+        word = random.choice(tag_correlations)[0]
+
+        return self.forms[word].accept(*forms)
+
 
     def insert(self, name, tags):
         types = extract_all(tags, *self.word_types, to_pop=True)

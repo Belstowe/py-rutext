@@ -11,5 +11,12 @@ def main():
     tags = tokens[1:]
     db.insert(name, tags)
 
+    print('Вводите тэги:')
+    while True:
+        tags = input()
+        if len(tags) == 0:
+            break
+        print(db.get(*tags.split()))
+
 if __name__ == '__main__':
     main()
