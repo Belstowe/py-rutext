@@ -1,8 +1,10 @@
 """A text generator based on templating texts and word picking"""
 
-__version__ = "0.1"
+__version__ = "0.2"
 
 from WordDict.WordList import WordList
+import yaml
+
 
 def main():
     db = WordList()
@@ -24,6 +26,15 @@ def main():
         if len(tags) == 0:
             break
         print(db.get(*tags.split()))
+    
+    with open("forms.yaml", mode='w', encoding='utf-8') as f:
+        pairs = []
+        for key, value in db.forms.items():
+            pairs.append({key: value.to_dict()})
+        yaml.dump(pairs, f, indent=2, allow_unicode=True)
+
+    with open("tags.yaml", mode='w', encoding='utf-8') as f:
+        yaml.dump(db.tags, f, indent=2, allow_unicode=True)
 
 if __name__ == '__main__':
     main()

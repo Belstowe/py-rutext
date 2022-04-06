@@ -1,6 +1,3 @@
-from .Util.Util import extract_any, extract_all
-
-
 class FormKeeper():
     def __init__(self):
         self.rooms = {}
@@ -16,7 +13,7 @@ class FormKeeper():
         if form[0] == '=':
             return form[1:]
         subcount = form.count('-')
-        return word[:-subcount] + form[subcount]
+        return word[:-subcount] + form[subcount:]
 
     def accept(self, *args):
         for key, value in self.rooms.items():
@@ -29,6 +26,15 @@ class FormKeeper():
         if type(value) is str:
             return value
         return value.accept(*args)
+
+    def to_dict(self):
+        to_return = []
+        for key, value in self.rooms.items():
+            if type(value) is str:
+                to_return.append({key: value})
+            else:
+                to_return.append({key: value.to_dict()})
+        return to_return
 
 
 class BaseFormKeeper(FormKeeper):
@@ -49,9 +55,6 @@ class BaseFormKeeper(FormKeeper):
             else:
                 self.rooms[self.default_key] = NounDeclinedFormKeeper(word, *args, path=path)
         elif 'пр.' in args:
-            # self.default_key = 'ед.ч.'
-            # self.rooms['ед.ч.'] = AdjSingularFormKeeper(word, args, path=path + ('Единственное число', ))
-            # self.rooms['мн.ч.'] = AdjPluralFormKeeper(word, args, path=path + ('Множественное число', ))
             self.rooms[self.default_key] = NounDeclinedFormKeeper(word, *args, path=path)
         else:
             self.rooms[self.default_key] = word

@@ -1,4 +1,4 @@
-from .Util.Util import extract_any, extract_all
+from .Util.Util import extract_all
 from . import FormKeepers
 import random
 
@@ -50,7 +50,7 @@ class WordList():
                     tags.append('нескл.')
                 case 'перс':
                     tags.append('ед.ч.')
-        
+
         print(f'Базовая форма слова: "{name}".')
         print('Часть речи: ', end='')
         if 'гл.' in tags: print('глагол.')
