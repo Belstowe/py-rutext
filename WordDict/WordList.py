@@ -21,16 +21,12 @@ class WordList():
     def get(self, *args):
         tags = list(args)
 
-        forms = []
+        forms = extract_all(tags, 'ед.ч.', 'мн.ч.', 'и.п.', 'р.п.', 'д.п.', 'в.п.', 'т.п.', 'п.п.', 'п.в.', 'н.в.', 'б.в.', '1л', '2л', '3л', to_pop=True)
 
         if 'гл.' in args:
-            forms = extract_all(tags, 'ед.ч.', 'мн.ч.', '1л', '2л', '3л', 'инф.', 'пов.', 'м.р.', 'с.р.', 'ж.р.', 'п.в.', 'н.в.', 'б.в.', to_pop=True)
-        elif 'сущ.' in args:
-            forms = extract_all(tags, 'ед.ч.', 'мн.ч.', 'и.п.', 'р.п.', 'д.п.', 'в.п.', 'т.п.', 'п.п.', to_pop=True)
-        elif 'пр.' in args:
-            forms = extract_all(tags, 'ед.ч.', 'мн.ч.', 'и.п.', 'р.п.', 'д.п.', 'в.п.', 'т.п.', 'п.п.', to_pop=True)
+            forms.extend(extract_all(tags, 'инф.', 'пов.', 'м.р.', 'с.р.', 'ж.р.', to_pop=True))
 
-        tag_correlations = tuple(filter(lambda word_tags: all(tag in word_tags[1] for tag in tags), self.tags.items()))
+        tag_correlations = tuple(filter(lambda word_tags: all(tag in word_tags[1] for tag in tags), self.tags.items())) if len(tags) > 0 else tuple(self.tags.items())
 
         if len(tag_correlations) == 0:
             return

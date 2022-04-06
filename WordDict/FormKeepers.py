@@ -11,7 +11,12 @@ class FormKeeper():
         for dir in path[1:]:
             print(f', {dir}', end='')
         print(f' для слова "{word}": ', end='')
-        return input()
+        form = input()
+
+        if form[0] == '=':
+            return form[1:]
+        subcount = form.count('-')
+        return word[:-subcount] + form[subcount]
 
     def accept(self, *args):
         for key, value in self.rooms.items():
@@ -78,7 +83,8 @@ class VerbPastTimeFormKeeper(FormKeeper):
         super().__init__()
 
         standard_form = self.ask(word, path)
-
+        self.default_key = 'м.р.'
+        
         self.rooms['м.р.'] = standard_form
         if standard_form[-1] != 'л':
             standard_form = standard_form + 'л'
