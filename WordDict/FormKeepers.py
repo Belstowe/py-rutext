@@ -10,8 +10,8 @@ class FormKeeper():
         print(f' для слова "{word}": ', end='')
         form = input()
 
-        if form[0] == '=':
-            return form[1:]
+        if form[0] == '+':
+            return word + form[1:]
         subcount = form.count('-')
         return word[:-subcount] + form[subcount:]
 
@@ -70,7 +70,9 @@ class BaseFormKeeper(FormKeeper):
             else:
                 self.rooms[self.default_key] = NounDeclinedFormKeeper(word, *args, path=path)
         elif 'пр.' in args:
-            self.rooms[self.default_key] = NounDeclinedFormKeeper(word, *args, path=path)
+            self.default_key = 'ед.ч.'
+            self.rooms['ед.ч.'] = AdjSingularFormKeeper(word, *args, path=path + ('Единственное число', ))
+            self.rooms['мн.ч.'] = AdjCaseFormKeeper(word, *args, path=path + ('Множественное число', ))
         else:
             self.rooms[self.default_key] = word
 
@@ -173,3 +175,49 @@ class NounCaseFormKeeper(FormKeeper):
         else:
             self.rooms['ед.ч.'] = word if 'Именительный падеж' in path else self.ask(word, path + ('единственное число', ))
             self.rooms['мн.ч.'] = self.ask(word, path + ('множественное число', ))
+
+
+class AdjSingularFormKeeper(FormKeeper):
+    def __init__(self, word: str, *args, path=()):
+        super().__init__()
+
+        self.default_key = 'м.р.'
+        mascul_neu_preset = {
+            'р.п.': self.ask(word, path=path + ('мужской/средний род', 'родительный падеж')),
+            'д.п.': self.ask(word, path=path + ('мужской/средний род', 'дательный падеж')),
+            'т.п.': self.ask(word, path=path + ('мужской/средний род', 'творительный падеж')), 
+            'п.п.': self.ask(word, path=path + ('мужской/средний род', 'предложный падеж'))
+        }
+
+        mascul_preset = mascul_neu_preset
+        mascul_preset['и.п.'] = word
+        mascul_preset['в.п.'] = mascul_neu_preset['р.п.']
+        
+        neu_preset = mascul_neu_preset
+        neu_preset['и.п.'] = self.ask(word, path=path + ('средний род', 'именительный/винительный падеж'))
+        neu_preset['в.п.'] = neu_preset['и.п.']
+        
+        fem_case = self.ask(word, path=path + ('женский род', 'родительный/дательный/творительный/предложный падеж'))
+
+        self.rooms['м.р.'] = AdjCaseFormKeeper(word, *args, path=path + ('мужской род', ), preset=mascul_preset)
+        self.rooms['с.р.'] = AdjCaseFormKeeper(word, *args, path=path + ('средний род', ), preset=neu_preset)
+        self.rooms['ж.р.'] = AdjCaseFormKeeper(word, *args, path=path + ('женский род', ), preset={
+            'р.п.': fem_case,
+            'д.п.': fem_case,
+            'т.п.': fem_case,
+            'п.п.': fem_case
+        })
+
+class AdjCaseFormKeeper(FormKeeper):
+    def __init__(self, word: str, *args, path=(), preset={}):
+        super().__init__()
+
+        self.default_key = 'и.п.'
+
+        for caseform in (('и.п.', 'именительный падеж'),
+                         ('р.п.', 'родительный падеж'),
+                         ('д.п.', 'дательный падеж'),
+                         ('в.п.', 'винительный падеж'),
+                         ('т.п.', 'творительный падеж'),
+                         ('п.п.', 'предложный падеж')):
+            self.rooms[caseform[0]] = self.ask(word, path=path + (caseform[1], )) if caseform[0] not in preset else preset[caseform[0]]

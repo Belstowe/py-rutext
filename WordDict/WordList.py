@@ -1,23 +1,25 @@
 from .Util.Util import extract_all
 from . import FormKeepers
 import random
+import sys
+import yaml
 
 
 class WordList():
 
-    word_types = ('безл.')
-
+    word_types = ('безл.', )
     word_traits = ('абр', 'пинг', 'перс')
 
     def __init__(self):
         self.forms = dict()
         self.tags = dict()
+        self.__cache = []
 
     def delete(self, *args):
         for name in args:
             del self.forms[name]
             del self.tags[name]
-    
+
     def get(self, *args):
         tags = list(args)
 
@@ -25,6 +27,8 @@ class WordList():
 
         if 'гл.' in args:
             forms.extend(extract_all(tags, 'инф.', 'пов.', 'м.р.', 'с.р.', 'ж.р.', to_pop=True))
+        elif 'пр.' in args:
+            forms.extend(extract_all(tags, 'м.р.', 'с.р.', 'ж.р.', to_pop=True))
 
         tag_correlations = tuple(filter(lambda word_tags: all(tag in word_tags[1] for tag in tags), self.tags.items())) if len(tags) > 0 else tuple(self.tags.items())
 
@@ -35,13 +39,39 @@ class WordList():
 
         return self.forms[word].accept(*forms)
 
+    def read(self, *, tagsin=sys.stdin, formsin=sys.stdin):
+        if tagsin != None and formsin != None:
+            saved_forms = yaml.load(formsin, yaml.Loader)
+            if type(saved_forms) == dict:
+                for key, value in saved_forms.items():
+                    self.forms[key] = FormKeepers.CustomFormKeeper(value)
+            
+            saved_tags = yaml.load(tagsin, yaml.Loader)
+            if type(saved_tags) == dict:
+                self.tags = saved_tags
+
+    def flush(self, *, tagsout=sys.stdout, formsout=sys.stdout):
+        if len(self.__cache) == 0:
+            return
+
+        cached_tags = {}
+        cached_forms = {}
+        for key in self.__cache:
+            cached_tags[key] = self.tags[key]
+            cached_forms[key] = self.forms[key].to_dict()
+
+        yaml.dump(cached_tags, tagsout, indent=2, allow_unicode=True)
+        yaml.dump(cached_forms, formsout, indent=2, allow_unicode=True)
+
+        self.__cache.clear()
+
 
     def insert(self, name, tags):
         types = extract_all(tags, *self.word_types, to_pop=True)
         for word_type in types:
             match word_type:
                 case 'безл.':
-                    tags.extend('м.р.', 'ж.р.')
+                    tags.extend(('м.р.', 'ж.р.'))
 
         traits = extract_all(tags, *self.word_traits, to_pop=False)
         for word_trait in traits:
@@ -58,7 +88,10 @@ class WordList():
         elif 'сущ.' in tags: print('существительное.')
         else: print('другое (наречие/деепричастие/...)')
         print(f'Теги: {tags}.')
-        
+
+        if name in self.tags:
+            print(f'!! Это слово уже есть в списке.\n   Его теги: {self.tags[name]}.')
+            return
         if 'гл.' in tags:
             if 'сов.' not in tags and 'несов.' not in tags:
                 print('!! Пожалуйста, укажите завершённость глагола: совершённый "сов." или несовершённый "несов."')
@@ -78,3 +111,4 @@ class WordList():
 
         self.forms[name] = FormKeepers.BaseFormKeeper(name, *tags)
         self.tags[name] = tags
+        self.__cache.append(name)

@@ -1,10 +1,8 @@
 """A Russian text generator based on templating texts and word picking"""
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 from WordDict.WordList import WordList
-from WordDict.FormKeepers import CustomFormKeeper
-import yaml
 import os.path
 
 
@@ -32,29 +30,20 @@ def user_interact(db):
 def main():
     db = WordList()
 
-    if os.path.isfile("forms.yaml") and os.path.isfile("tags.yaml"):
-        with open("forms.yaml", mode='r', encoding='utf-8') as f:
-            forms = yaml.load(f, yaml.Loader)
-            if type(forms) == dict:
-                for key, value in forms.items():
-                    db.forms[key] = CustomFormKeeper(value)
+    forms_db = "forms.yaml"
+    tags_db = "tags.yaml"
 
-        with open("tags.yaml", mode='r', encoding='utf-8') as f:
-            tags = yaml.load(f, yaml.Loader)
-            if type(tags) == dict:
-                db.tags = tags
+    if os.path.isfile(forms_db) and os.path.isfile(tags_db):
+        with open(forms_db, mode='r', encoding='utf-8') as formsin:
+            with open(tags_db, mode='r', encoding='utf-8') as tagsin:
+                db.read(formsin=formsin, tagsin=tagsin)
 
     try:
         user_interact(db)
     finally:
-        with open("forms.yaml", mode='w', encoding='utf-8') as f:
-            pairs = {}
-            for key, value in db.forms.items():
-                pairs[key] = value.to_dict()
-            yaml.dump(pairs, f, indent=2, allow_unicode=True)
-
-        with open("tags.yaml", mode='w', encoding='utf-8') as f:
-            yaml.dump(db.tags, f, indent=2, allow_unicode=True)
+        with open(forms_db, mode='a', encoding='utf-8') as formsout:
+            with open(tags_db, mode='a', encoding='utf-8') as tagsout:
+                db.flush(formsout=formsout, tagsout=tagsout)
 
 
 if __name__ == '__main__':
