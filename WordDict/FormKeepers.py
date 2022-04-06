@@ -1,6 +1,7 @@
 _default = '_def'
 _default_key = '_defkey'
 
+
 class FormKeeper():
     def __init__(self):
         global _default
@@ -188,18 +189,18 @@ class AdjSingularFormKeeper(FormKeeper):
         mascul_neu_preset = {
             'р.п.': self.ask(word, path=path + ('мужской/средний род', 'родительный падеж')),
             'д.п.': self.ask(word, path=path + ('мужской/средний род', 'дательный падеж')),
-            'т.п.': self.ask(word, path=path + ('мужской/средний род', 'творительный падеж')), 
+            'т.п.': self.ask(word, path=path + ('мужской/средний род', 'творительный падеж')),
             'п.п.': self.ask(word, path=path + ('мужской/средний род', 'предложный падеж'))
         }
 
         mascul_preset = mascul_neu_preset
         mascul_preset['и.п.'] = '+'
         mascul_preset['в.п.'] = mascul_neu_preset['р.п.']
-        
+
         neu_preset = mascul_neu_preset
         neu_preset['и.п.'] = self.ask(word, path=path + ('средний род', 'именительный/винительный падеж'))
         neu_preset['в.п.'] = neu_preset['и.п.']
-        
+
         fem_case = self.ask(word, path=path + ('женский род', 'родительный/дательный/творительный/предложный падеж'))
 
         self.rooms['м.р.'] = AdjCaseFormKeeper(word, *args, path=path + ('мужской род', ), preset=mascul_preset)
@@ -210,6 +211,7 @@ class AdjSingularFormKeeper(FormKeeper):
             'т.п.': fem_case,
             'п.п.': fem_case
         })
+
 
 class AdjCaseFormKeeper(FormKeeper):
     def __init__(self, word: str, *args, path=(), preset={}):

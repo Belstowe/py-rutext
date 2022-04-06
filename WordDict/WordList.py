@@ -30,7 +30,9 @@ class WordList():
         elif 'пр.' in args:
             forms.extend(extract_all(tags, 'м.р.', 'с.р.', 'ж.р.', to_pop=True))
 
-        tag_correlations = tuple(filter(lambda word_tags: all(tag in word_tags[1] for tag in tags), self.tags.items())) if len(tags) > 0 else tuple(self.tags.items())
+        tag_correlations = tuple(filter(
+            lambda word_tags: all(tag in word_tags[1] for tag in tags), self.tags.items()
+            )) if len(tags) > 0 else tuple(self.tags.items())
 
         if len(tag_correlations) == 0:
             return
@@ -40,12 +42,12 @@ class WordList():
         return rel_format(word, self.forms[word].accept(*forms))
 
     def read(self, *, tagsin=sys.stdin, formsin=sys.stdin):
-        if tagsin != None and formsin != None:
+        if tagsin is not None and formsin is not None:
             saved_forms = yaml.load(formsin, yaml.Loader)
             if type(saved_forms) == dict:
                 for key, value in saved_forms.items():
                     self.forms[key] = FormKeepers.CustomFormKeeper(value)
-            
+
             saved_tags = yaml.load(tagsin, yaml.Loader)
             if type(saved_tags) == dict:
                 self.tags = saved_tags
@@ -65,7 +67,6 @@ class WordList():
 
         self.__cache.clear()
 
-
     def insert(self, name, tags):
         types = extract_all(tags, *self.word_types, to_pop=True)
         for word_type in types:
@@ -83,14 +84,19 @@ class WordList():
 
         print(f'Базовая форма слова: "{name}".')
         print('Часть речи: ', end='')
-        if 'гл.' in tags: print('глагол.')
-        elif 'пр.' in tags: print('прилагательное/причастие.')
-        elif 'сущ.' in tags: print('существительное.')
-        else: print('другое (наречие/деепричастие/...)')
+        if 'гл.' in tags:
+            print('глагол.')
+        elif 'пр.' in tags:
+            print('прилагательное/причастие.')
+        elif 'сущ.' in tags:
+            print('существительное.')
+        else:
+            print('другое (наречие/деепричастие/...)')
         print(f'Теги: {tags}.')
 
         if name in self.tags:
-            print(f'!! Это слово уже есть в списке.\n   Его теги: {self.tags[name]}.')
+            print(f'!! Это слово уже есть в списке.')
+            print(f'   Его теги: {self.tags[name]}.')
             return
         if 'гл.' in tags:
             if 'сов.' not in tags and 'несов.' not in tags:
@@ -98,7 +104,8 @@ class WordList():
                 return
         if 'сущ.' in tags:
             if 'м.р.' not in tags and 'с.р.' not in tags and 'ж.р.' not in tags:
-                print('! Вы не указали род существительного (м.р.|с.р.|ж.р.|безл.).\n  Выборка в тексте в основном требует род, что значит, ваше слово практически не будет показываться.')
+                print('! Вы не указали род существительного (м.р.|с.р.|ж.р.|безл.).')
+                print('  Выборка в тексте в основном требует род, что значит, ваше слово практически не будет показываться.')
         if len(name.split()) > 1:
             print('! Крайне не рекомендуем добавлять словосочетания.')
         if len(tags) == 0:
