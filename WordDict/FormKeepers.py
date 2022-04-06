@@ -29,6 +29,10 @@ class FormKeeper():
 
     def to_dict(self):
         to_return = []
+
+        if self.default_key != 'DEFAULT':
+            to_return.append({'default_key': self.default_key})
+
         for key, value in self.rooms.items():
             if type(value) is str:
                 to_return.append({key: value})
@@ -42,10 +46,6 @@ class BaseFormKeeper(FormKeeper):
         super().__init__()
 
         if 'гл.' in args:
-            if 'сов.' not in args and 'несов.' not in args:
-                print('Пожалуйста, укажите завершённость глагола: совершённый "сов." или несовершённый "несов."')
-                return
-
             self.rooms['инф.'] = word
             self.rooms['пов.'] = VerbImperativeFormKeeper(word, path=path + ('Повелительное наклонение', ))
             self.rooms[self.default_key] = VerbConjugableFormKeeper(word, *args, path=path)

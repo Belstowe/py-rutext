@@ -6,7 +6,7 @@ requires = [
 build-backend = "flit_core.buildapi"
 
 [project]
-name = "py-text-gen"
+name = "py-rutext"
 authors = [{name = "Belreau Cohen", email = "nuu.chah.nulth@disroot.org"}]
 dynamic = ["version", "description"]
 

@@ -1,6 +1,6 @@
-"""A text generator based on templating texts and word picking"""
+"""A Russian text generator based on templating texts and word picking"""
 
-__version__ = "0.2"
+__version__ = "0.2.1"
 
 from WordDict.WordList import WordList
 import yaml
@@ -35,6 +35,7 @@ def main():
 
     with open("tags.yaml", mode='w', encoding='utf-8') as f:
         yaml.dump(db.tags, f, indent=2, allow_unicode=True)
+
 
 if __name__ == '__main__':
     main()

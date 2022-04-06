@@ -25,14 +25,6 @@ def extract_all(self: list, *args, to_pop=False):
     return to_return
 
 
-def visit(self: dict, visitor, path=() ):
-    for key, value in self:
-        if type(value) != self:
-            visitor(path, self)
-        else:
-            visit(value, visitor, path + (key, ))
-
-
 def safe_remove(self: list, elem):
     with suppress(ValueError, AttributeError):
         self.remove(elem)
