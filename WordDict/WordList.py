@@ -1,4 +1,4 @@
-from .Util.Util import extract_all
+from .Util.Util import extract_all, rel_format
 from . import FormKeepers
 import random
 import sys
@@ -37,7 +37,7 @@ class WordList():
 
         word = random.choice(tag_correlations)[0]
 
-        return self.forms[word].accept(*forms)
+        return rel_format(word, self.forms[word].accept(*forms))
 
     def read(self, *, tagsin=sys.stdin, formsin=sys.stdin):
         if tagsin != None and formsin != None:

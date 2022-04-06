@@ -1,19 +1,18 @@
+_default = '_def'
+_default_key = '_defkey'
+
 class FormKeeper():
     def __init__(self):
+        global _default
         self.rooms = {}
-        self.default_key = 'DEFAULT'
+        self.default_key = _default
 
     def ask(self, word: str, path=()):
         print(path[0], end='')
         for dir in path[1:]:
             print(f', {dir}', end='')
         print(f' для слова "{word}": ', end='')
-        form = input()
-
-        if form[0] == '+':
-            return word + form[1:]
-        subcount = form.count('-')
-        return word[:-subcount] + form[subcount:]
+        return input()
 
     def accept(self, *args):
         for key, value in self.rooms.items():
@@ -28,26 +27,30 @@ class FormKeeper():
         return value.accept(*args)
 
     def to_dict(self):
+        global _default
+        global _default_key
         to_return = {}
 
-        if self.default_key != 'DEFAULT':
-            to_return['default_key'] = self.default_key
+        if self.default_key != _default:
+            to_return[_default_key] = self.default_key
 
         for key, value in self.rooms.items():
             if type(value) is str:
                 to_return[key] = value
             else:
                 to_return[key] = value.to_dict()
+
         return to_return
 
 
 class CustomFormKeeper(FormKeeper):
     def __init__(self, forms={}):
+        global _default_key
         super().__init__()
 
-        if 'default_key' in forms:
-            self.default_key = forms['default_key']
-            del forms['default_key']
+        if _default_key in forms:
+            self.default_key = forms[_default_key]
+            del forms[_default_key]
 
         for key, value in forms.items():
             if type(value) is str:
@@ -61,12 +64,12 @@ class BaseFormKeeper(FormKeeper):
         super().__init__()
 
         if 'гл.' in args:
-            self.rooms['инф.'] = word
+            self.rooms['инф.'] = '+'
             self.rooms['пов.'] = VerbImperativeFormKeeper(word, path=path + ('Повелительное наклонение', ))
             self.rooms[self.default_key] = VerbConjugableFormKeeper(word, *args, path=path)
         elif 'сущ.' in args:
             if 'нескл.' in args:
-                self.rooms[self.default_key] = word
+                self.rooms[self.default_key] = '+'
             else:
                 self.rooms[self.default_key] = NounDeclinedFormKeeper(word, *args, path=path)
         elif 'пр.' in args:
@@ -74,13 +77,13 @@ class BaseFormKeeper(FormKeeper):
             self.rooms['ед.ч.'] = AdjSingularFormKeeper(word, *args, path=path + ('Единственное число', ))
             self.rooms['мн.ч.'] = AdjCaseFormKeeper(word, *args, path=path + ('Множественное число', ))
         else:
-            self.rooms[self.default_key] = word
+            self.rooms[self.default_key] = '+'
 
 
 class VerbImperativeFormKeeper(FormKeeper):
     def __init__(self, word: str, *, path=()):
         super().__init__()
-        
+
         imperative_form = self.ask(word, path, )
         self.rooms[self.default_key] = imperative_form
         self.rooms['мн.ч.'] = imperative_form + 'те'
@@ -90,7 +93,7 @@ class VerbConjugableFormKeeper(FormKeeper):
     def __init__(self, word: str, *args, path=()):
         super().__init__()
 
-        self.rooms[self.default_key] = word
+        self.rooms[self.default_key] = '+'
 
         self.rooms['п.в.'] = VerbPastTimeFormKeeper(word, path=path + ('Прошедшее время', ))
         self.rooms['б.в.'] = VerbTimeFormKeeper(word, *args, path=path + ('Будущее время', ))
@@ -104,7 +107,7 @@ class VerbPastTimeFormKeeper(FormKeeper):
 
         standard_form = self.ask(word, path)
         self.default_key = 'м.р.'
-        
+
         self.rooms['м.р.'] = standard_form
         if standard_form[-1] != 'л':
             standard_form = standard_form + 'л'
@@ -117,8 +120,8 @@ class VerbTimeFormKeeper(FormKeeper):
     def __init__(self, word: str, *args, path=()):
         super().__init__()
 
-        self.rooms[self.default_key] = word
-        
+        self.rooms[self.default_key] = '+'
+
         self.rooms['1л'] = VerbPersonFormKeeper(word, *args, path=path + ('первое лицо', ))
         self.rooms['2л'] = VerbPersonFormKeeper(word, *args, path=path + ('второе лицо', ))
         self.rooms['3л'] = VerbPersonFormKeeper(word, *args, path=path + ('третье лицо', ))
@@ -132,16 +135,16 @@ class VerbPersonFormKeeper(FormKeeper):
 
         if 'несов.' in args and 'Будущее время' in path:
             if 'первое лицо' in path:
-                self.rooms['ед.ч.'] = 'буду ' + word
-                self.rooms['мн.ч.'] = 'будем ' + word
+                self.rooms['ед.ч.'] = 'буду +'
+                self.rooms['мн.ч.'] = 'будем +'
                 return
             if 'второе лицо' in path:
-                self.rooms['ед.ч.'] = 'будешь ' + word
-                self.rooms['мн.ч.'] = 'будете ' + word
+                self.rooms['ед.ч.'] = 'будешь +'
+                self.rooms['мн.ч.'] = 'будете +'
                 return
             if 'третье лицо' in path:
-                self.rooms['ед.ч.'] = 'будет ' + word
-                self.rooms['мн.ч.'] = 'будут ' + word
+                self.rooms['ед.ч.'] = 'будет +'
+                self.rooms['мн.ч.'] = 'будут +'
                 return
 
         self.rooms['ед.ч.'] = self.ask(word, path + ('единственное число', ))
@@ -169,11 +172,11 @@ class NounCaseFormKeeper(FormKeeper):
         self.default_key = 'ед.ч.' if 'мн.ч.' not in args else 'мн.ч.'
 
         if 'ед.ч.' in args:
-            self.rooms['ед.ч.'] = word if 'Именительный падеж' in path else self.ask(word, path)
+            self.rooms['ед.ч.'] = '+' if 'Именительный падеж' in path else self.ask(word, path)
         elif 'мн.ч.' in args:
-            self.rooms['мн.ч.'] = word if 'Именительный падеж' in path else self.ask(word, path)
+            self.rooms['мн.ч.'] = '+' if 'Именительный падеж' in path else self.ask(word, path)
         else:
-            self.rooms['ед.ч.'] = word if 'Именительный падеж' in path else self.ask(word, path + ('единственное число', ))
+            self.rooms['ед.ч.'] = '+' if 'Именительный падеж' in path else self.ask(word, path + ('единственное число', ))
             self.rooms['мн.ч.'] = self.ask(word, path + ('множественное число', ))
 
 
@@ -190,7 +193,7 @@ class AdjSingularFormKeeper(FormKeeper):
         }
 
         mascul_preset = mascul_neu_preset
-        mascul_preset['и.п.'] = word
+        mascul_preset['и.п.'] = '+'
         mascul_preset['в.п.'] = mascul_neu_preset['р.п.']
         
         neu_preset = mascul_neu_preset

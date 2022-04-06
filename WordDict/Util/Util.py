@@ -28,3 +28,13 @@ def extract_all(self: list, *args, to_pop=False):
 def safe_remove(self: list, elem):
     with suppress(ValueError, AttributeError):
         self.remove(elem)
+
+
+def rel_format(self: str, mod: str):
+    if mod[0] == '+':
+        return self + mod[1:]
+    if mod[-1] == '+':
+        return mod[:-1] + self
+
+    subcount = mod.count('-')
+    return self[:-subcount] + mod[subcount:]
