@@ -28,17 +28,32 @@ class FormKeeper():
         return value.accept(*args)
 
     def to_dict(self):
-        to_return = []
+        to_return = {}
 
         if self.default_key != 'DEFAULT':
-            to_return.append({'default_key': self.default_key})
+            to_return['default_key'] = self.default_key
 
         for key, value in self.rooms.items():
             if type(value) is str:
-                to_return.append({key: value})
+                to_return[key] = value
             else:
-                to_return.append({key: value.to_dict()})
+                to_return[key] = value.to_dict()
         return to_return
+
+
+class CustomFormKeeper(FormKeeper):
+    def __init__(self, forms={}):
+        super().__init__()
+
+        if 'default_key' in forms:
+            self.default_key = forms['default_key']
+            del forms['default_key']
+
+        for key, value in forms.items():
+            if type(value) is str:
+                self.rooms[key] = value
+            else:
+                self.rooms[key] = CustomFormKeeper(value)
 
 
 class BaseFormKeeper(FormKeeper):
