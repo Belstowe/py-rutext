@@ -47,9 +47,21 @@ class WordList():
         for word_trait in traits:
             match word_trait:
                 case 'абр' | 'пинг':
-                    tags.extend('нескл.')
+                    tags.append('нескл.')
                 case 'перс':
-                    tags.extend('ед.ч.')
+                    tags.append('ед.ч.')
+        
+        print(f'Базовая форма слова: "{name}".')
+        print('Часть речи: ', end='')
+        if 'гл.' in tags: print('глагол.')
+        elif 'пр.' in tags: print('прилагательное/причастие.')
+        elif 'сущ.' in tags: print('существительное.')
+        else: print('другое (наречие/деепричастие/...)')
+        print(f'Теги: {tags}.')
+        print('Продолжить? (любой символ, чтобы отменить) ', end='')
+        if len(input()) != 0:
+            return
+        print()
 
         self.forms[name] = FormKeepers.BaseFormKeeper(name, *tags)
         self.tags[name] = tags

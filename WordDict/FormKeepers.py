@@ -34,10 +34,10 @@ class FormKeeper():
 class BaseFormKeeper(FormKeeper):
     def __init__(self, word: str, *args, path=()):
         super().__init__()
-        
+
         if 'гл.' in args:
             if 'сов.' not in args and 'несов.' not in args:
-                print('Пожалуйста, укажите завершённость глагола: совершенный "сов." или несовершённый "несов."')
+                print('Пожалуйста, укажите завершённость глагола: совершённый "сов." или несовершённый "несов."')
                 return
 
             self.rooms['инф.'] = word
