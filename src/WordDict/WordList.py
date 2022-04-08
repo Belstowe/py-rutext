@@ -28,7 +28,7 @@ class WordList():
         if 'гл.' in args:
             forms.extend(extract_all(tags, 'инф.', 'пов.', 'м.р.', 'с.р.', 'ж.р.', to_pop=True))
         elif 'пр.' in args:
-            forms.extend(extract_all(tags, 'м.р.', 'с.р.', 'ж.р.', to_pop=True))
+            forms.extend(extract_all(tags, 'одуш.', 'неодуш.', 'м.р.', 'с.р.', 'ж.р.', to_pop=True))
 
         tag_correlations = tuple(filter(
             lambda word_tags: all(tag in word_tags[1] for tag in tags), self.tags.items()
