@@ -12,9 +12,10 @@ def declined(word: str, *args, path=()):
     }
 
 def case(word: str, *args, path=()):
+    if 'ед.ч.' in args or 'мн.ч.' in args:
+        return '+' if 'и.п.' in args else Defines.ask(word, path)
+
     return {
-        Defines.default: '+' if 'и.п.' in args else Defines.ask(word, path)
-    } if 'ед.ч.' in args or 'мн.ч.' in args else {
         Defines.default: '+' if 'и.п.' in args else Defines.ask(word, path + ('единственное число', )),
         'мн.ч.': Defines.ask(word, path + ('множественное число', ))
     }

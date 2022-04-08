@@ -6,10 +6,10 @@ def lookup(self, *args):
         return self
 
     default_key = Defines.default if Defines.default_key not in self else self[Defines.default_key]
-
-    for key, value in self.items():
-        if key in args:
-            return lookup(value, *args)
+    
+    for arg in args:
+        if arg in self:
+            return lookup(self[arg], *args)
 
     value = self[default_key]
     return lookup(value, *args)

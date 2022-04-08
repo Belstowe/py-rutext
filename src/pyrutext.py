@@ -1,6 +1,6 @@
 """A Russian text generator based on templating texts and word picking"""
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 from WordDict.WordList import WordList
 import os.path
@@ -13,10 +13,10 @@ def user_interact(db):
         word = input()
         if len(word) == 0:
             break
-        tokens = word.split(sep=' ')
+        tokens = word.split()
         name = tokens[0]
-        tags = tokens[1:] if len(tokens) > 1 else ()
-        db.insert(name, tags)
+        tags = set(tokens[1:]) if len(tokens) > 1 else ()
+        db.insert(name, list(tags))
 
     print('Введите теги:')
     while True:
@@ -24,7 +24,8 @@ def user_interact(db):
         tags = input()
         if len(tags) == 0:
             break
-        print(db.get(*tags.split()))
+        tags_set = set(tags.split())
+        print(db.get(*tags_set))
 
 
 def main():
