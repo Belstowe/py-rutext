@@ -1,5 +1,5 @@
 from .Util.Util import extract_all, rel_format
-from . import FormKeepers
+from . import Forms
 import random
 import sys
 import yaml
@@ -39,14 +39,13 @@ class WordList():
 
         word = random.choice(tag_correlations)[0]
 
-        return rel_format(word, self.forms[word].accept(*forms))
+        return rel_format(word, Forms.lookup(self.forms[word], *forms))
 
     def read(self, *, tagsin=sys.stdin, formsin=sys.stdin):
         if tagsin is not None and formsin is not None:
             saved_forms = yaml.load(formsin, yaml.Loader)
             if type(saved_forms) == dict:
-                for key, value in saved_forms.items():
-                    self.forms[key] = FormKeepers.CustomFormKeeper(value)
+                self.forms = saved_forms
 
             saved_tags = yaml.load(tagsin, yaml.Loader)
             if type(saved_tags) == dict:
@@ -60,7 +59,7 @@ class WordList():
         cached_forms = {}
         for key in self.__cache:
             cached_tags[key] = self.tags[key]
-            cached_forms[key] = self.forms[key].to_dict()
+            cached_forms[key] = self.forms[key]
 
         yaml.dump(cached_tags, tagsout, indent=2, allow_unicode=True)
         yaml.dump(cached_forms, formsout, indent=2, allow_unicode=True)
@@ -116,6 +115,6 @@ class WordList():
             return
         print()
 
-        self.forms[name] = FormKeepers.BaseFormKeeper(name, *tags)
+        self.forms[name] = Forms.construct_forms(name, *tags)
         self.tags[name] = tags
         self.__cache.append(name)
