@@ -1,6 +1,7 @@
 default = '_def'
 default_key = '_defkey'
-tags_key = '_tags'
+tags_key = '__tags'
+
 
 def ask(word: str, path=()):
     print(path[0], end='')

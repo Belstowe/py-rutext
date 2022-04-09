@@ -38,6 +38,7 @@ def singular(word: str, *, path=()):
         }
     }
 
+
 def plural(word: str, *, path=()):
     nominative = Defines.ask(word, path=path + ('именительный падеж', ))
     genitive = Defines.ask(word, path=path + ('родительный падеж', ))

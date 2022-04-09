@@ -8,6 +8,7 @@ def imperative(word: str, *, path=()):
         'мн.ч.': imperative_form + 'те'
     }
 
+
 def conjugable(word: str, *args, path=()):
     forms = {}
 
@@ -18,6 +19,7 @@ def conjugable(word: str, *args, path=()):
         forms['н.в.'] = time(word, *args, 'н.в.', path=path + ('Настоящее время', ))
 
     return forms
+
 
 def time_past(word: str, *, path=()):
     forms = {}
@@ -33,6 +35,7 @@ def time_past(word: str, *, path=()):
 
     return forms
 
+
 def time(word: str, *args, path=()):
     return {
         Defines.default: '+',
@@ -40,6 +43,7 @@ def time(word: str, *args, path=()):
         '2л': person(word, *args, '2л', path=path + ('второе лицо', )),
         '3л': person(word, *args, '3л', path=path + ('третье лицо', ))
     }
+
 
 def person(word: str, *args, path=()):
     if 'б.в.' in args and 'несов.' in args:

@@ -11,6 +11,7 @@ def declined(word: str, *args, path=()):
         'п.п.': case(word, *args, 'п.п.', path=path + ('Предложный падеж', ))
     }
 
+
 def case(word: str, *args, path=()):
     if 'ед.ч.' in args or 'мн.ч.' in args:
         return '+' if 'и.п.' in args else Defines.ask(word, path)
