@@ -14,3 +14,6 @@ dependencies = [
 
 [project.urls]
 Home = "https://github.com/Belstowe/py-rutext.git"
+
+[tool.flit.sdist]
+exclude = [".github/"]

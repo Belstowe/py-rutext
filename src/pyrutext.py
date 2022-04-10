@@ -1,21 +1,24 @@
 """A Russian text generator based on templating texts and word picking"""
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 from WordProcessing.WordDict import WordDict
-import stdio_rutext as IO
+import StdIO.db_yaml as DB
+import StdIO.io_shell as IO
+import asyncio
 
 
-def main():
-    db = WordDict()
+async def main():
+    word_manager = WordDict()
 
-    IO.db_init(db)
+    DB.init(word_manager)
+    IO.init(word_manager)
 
     try:
-        IO.user_interact(db)
+        await IO.interact(word_manager)
     finally:
-        IO.db_save(db)
+        DB.save(word_manager)
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
