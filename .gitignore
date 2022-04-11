@@ -156,3 +156,4 @@ cython_debug/
 
 # For testing purposes
 __*.py
+/*.yaml

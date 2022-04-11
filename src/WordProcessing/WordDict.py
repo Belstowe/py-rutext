@@ -47,7 +47,7 @@ class WordDict():
         for name in args:
             del self.__words[name]
 
-    def get(self, *args):
+    def get(self, *args, to_format=True):
         tags = list(args)
 
         forms = extract_all(tags, 'ед.ч.', 'мн.ч.', 'и.п.', 'р.п.', 'д.п.', 'в.п.', 'т.п.', 'п.п.', 'п.в.', 'н.в.', 'б.в.', '1л', '2л', '3л', to_pop=True)
@@ -66,7 +66,10 @@ class WordDict():
 
         word = random.choice(tag_correlations)
 
-        return rel_format(word, Forms.lookup(self.__words[word], *forms))
+        return rel_format(word, Forms.lookup(self.__words[word], *forms)) if to_format else word
+
+    def get_form(self, word: str, *args):
+        return rel_format(word, Forms.lookup(self.__words[word], *args))
 
     def input(self, extension: dict):
         self.__words.update(extension)

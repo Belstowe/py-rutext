@@ -1,4 +1,5 @@
 from WordProcessing.WordDict import *
+from TextProcessing.Render import *
 import asyncio
 
 
@@ -52,7 +53,8 @@ def ask_form(word: str, path=()) -> str:
     for dir in path[1:]:
         print(f', {dir}', end='')
     print(f' для слова "{word}": ', end='')
-    return input()
+    form = input()
+    return '+' if form == '' else form
 
 
 async def interact(db: WordDict):
@@ -68,14 +70,28 @@ async def interact(db: WordDict):
         await asyncio.to_thread(db.insert, word, tags)
         print()
 
-    print('Введите теги:')
+    renderer = Renderer(db)
+    print('Введите шаблонный текст:')
+    text = ''
     while True:
-        tags = input()
-        if len(tags) == 0:
-            break
-        tags_set = set(tags.split())
-        print(db.get(*tags_set))
-        print()
+        line = input()
+        if len(line) == 0:
+            if len(text) == 0:
+                break
+            else:
+                render_result = renderer.render(text)
+                has_errors = False
+                for exception in render_result[1]:
+                    print(f'{exception.grade.name}: {exception.type.name}.')
+                    print(f'{exception.supplement}')
+                    if exception.grade == ErrorGrade.ERROR:
+                        has_errors = True
+                if not has_errors:
+                    print(renderer.render(text)[0])
+                print()
+                text = ''
+        else:
+            text = text + line + '\n'
 
 
 def init(db: WordDict):
