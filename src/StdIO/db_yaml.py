@@ -10,6 +10,8 @@ def yaml_compress():
         saved_words = dict()
         with open(__words_file, mode='r', encoding='utf-8') as wordsin:
             saved_words = yaml.load(wordsin, yaml.Loader)
+            if saved_words is not dict:
+                return
             hashed = dict()
             hashed_sub = dict()
             for key, value in saved_words.items():

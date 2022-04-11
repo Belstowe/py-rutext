@@ -1,6 +1,6 @@
 """A Russian text generator based on templating texts and word picking"""
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 
 from WordProcessing.WordDict import WordDict
 import StdIO.db_yaml as DB

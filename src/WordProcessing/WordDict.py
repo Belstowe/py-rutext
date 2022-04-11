@@ -89,17 +89,15 @@ class WordDict():
     def insert(self, word: str, tags):
         types = extract_all(tags, *self.__word_types, to_pop=True)
         for word_type in types:
-            match word_type:
-                case 'безл.':
-                    tags.extend(('м.р.', 'ж.р.'))
+            if word_type == 'безл.':
+                tags.extend(('м.р.', 'ж.р.'))
 
         traits = extract_all(tags, *self.__word_traits, to_pop=False)
         for word_trait in traits:
-            match word_trait:
-                case 'абр' | 'пинг':
-                    tags.append('нескл.')
-                case 'перс':
-                    tags.append('ед.ч.')
+            if word_trait in ('абр', 'пинг'):
+                tags.append('нескл.')
+            elif word_trait == 'перс':
+                tags.append('ед.ч.')
 
         tags = list(set(tags))
 
