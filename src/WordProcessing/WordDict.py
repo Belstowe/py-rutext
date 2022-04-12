@@ -1,5 +1,6 @@
 from .Util.Util import extract_all, rel_format
 from . import Forms, Defines
+from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Callable
 import enum
@@ -80,7 +81,7 @@ class WordDict():
 
         cached_words = {}
         for key in self.__cache:
-            cached_words[key] = self.__words[key]
+            cached_words[key] = deepcopy(self.__words[key])
 
         self.__cache.clear()
 

@@ -1,6 +1,7 @@
 from WordProcessing.WordDict import *
 from TextProcessing.Render import *
 import asyncio
+import re
 
 
 def confirm_word(response: InsertResponse) -> bool:
@@ -12,6 +13,9 @@ def confirm_word(response: InsertResponse) -> bool:
         print('прилагательное/причастие.')
     elif 'сущ.' in response.tags:
         print('существительное.')
+    elif any((re.match(r'&.', tag) for tag in response.tags)):
+        ref = [tag for tag in response.tags if re.match(r'&.', tag)][0][1:]
+        print(f'указатель на слово "{ref}".')
     else:
         print('другое (наречие/деепричастие/...)')
     print(f'Теги: {response.tags}.')

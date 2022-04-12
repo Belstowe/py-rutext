@@ -1,4 +1,5 @@
 from contextlib import suppress
+import re
 
 
 def extract_any(self: list, *args, to_pop=False, if_none=None):
@@ -31,10 +32,7 @@ def safe_remove(self: list, elem):
 
 
 def rel_format(self: str, mod: str):
-    if mod[0] == '+':
-        return self + mod[1:]
-    if mod[-1] == '+':
-        return mod[:-1] + self
-
-    subcount = mod.count('-')
-    return self[:-subcount] + mod[subcount:]
+    mod = re.sub(r'\+', self, mod)
+    subtract_count = re.match(r'[\-]+', mod)
+    subtract_count = 0 if subtract_count is None else len(subtract_count.group(0))
+    return self[:-subtract_count] + mod[subtract_count:]
