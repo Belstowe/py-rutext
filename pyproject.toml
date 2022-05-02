@@ -10,6 +10,7 @@ dynamic = ["version", "description"]
 classifiers = ["License :: OSI Approved :: MIT License"]
 dependencies = [
     "pyyaml ~=6.0",
+    "aioconsole ~=0.4",
 ]
 
 [project.urls]

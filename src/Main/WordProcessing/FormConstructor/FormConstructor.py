@@ -1,6 +1,8 @@
-from .FormConstructors import Adj, Noun, Verb
-from . import Defines
-from typing import Callable
+from .. import Defines
+from typing import Awaitable, Callable
+from .Adj import Adj
+from .Noun import Noun
+from .Verb import Verb
 
 
 def lookup(self, *args):
@@ -23,7 +25,7 @@ def tags(self: dict, word: str):
     return []
 
 
-def construct_forms(word: str, *args, path=(), ask_func: Callable[[str, list], str]):
+async def construct(word: str, *args, path=(), ask_method: Callable[[str, tuple[str, ...]], Awaitable[str]]):
     if len(args) == 0:
         return '+'
 
@@ -34,20 +36,20 @@ def construct_forms(word: str, *args, path=(), ask_func: Callable[[str, list], s
     if 'гл.' in args:
         return {
             **origin,
-            Defines.default: Verb.conjugable(word, *args, path=path, ask_func=ask_func),
-            'пов.': Verb.imperative(word, path=path + ('Повелительное наклонение', ), ask_func=ask_func),
+            Defines.default: await Verb(ask_method).conjugable(word, *args, path=path),
+            'пов.': await Verb(ask_method).imperative(word, path=path + ('Повелительное наклонение', )),
             'инф.': '+'
         }
     elif 'сущ.' in args:
         return {
             **origin,
-            Defines.default: '+' if 'нескл.' in args else Noun.declined(word, *args, path=path, ask_func=ask_func)
+            Defines.default: '+' if 'нескл.' in args else await Noun(ask_method).declined(word, *args, path=path)
         }
     elif 'пр.' in args:
         return {
             **origin,
-            Defines.default: Adj.singular(word, path=path + ('Единственное число', ), ask_func=ask_func),
-            'мн.ч.': Adj.plural(word, path=path + ('Множественное число', ), ask_func=ask_func)
+            Defines.default: await Adj(ask_method).singular(word, path=path + ('Единственное число', )),
+            'мн.ч.': await Adj(ask_method).plural(word, path=path + ('Множественное число', ))
         }
     else:
         return {

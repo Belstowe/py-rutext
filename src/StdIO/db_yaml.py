@@ -1,53 +1,59 @@
-from WordProcessing.WordDict import *
-import os.path
+import asyncio
+from copy import copy
+import os
+from typing import Dict, Iterator, List, Union
 import yaml
 
-__words_file = "words.yaml"
+NestedDict = Dict[str, Union["NestedDict", str]]
 
 
-def yaml_compress():
-    if os.path.isfile(__words_file):
-        saved_words = dict()
-        with open(__words_file, mode='r', encoding='utf-8') as wordsin:
-            saved_words = yaml.load(wordsin, yaml.Loader)
-            if type(saved_words) is not dict:
-                return
-            hashed = dict()
-            hashed_sub = dict()
-            for key, value in saved_words.items():
-                if type(value) is not dict:
-                    continue
-                hash_full = hash(str(value))
-                if hash_full in hashed:
-                    saved_words[key] = saved_words[hashed[hash_full]]
-                    continue
-                hashed[hash_full] = key
+class DbYaml():
 
-                for subkey, subvalue in value.items():
-                    if type(subvalue) is str:
-                        continue
-                    hash_sub = hash(str(subvalue))
-                    if hash_sub in hashed_sub:
-                        saved_words[key][subkey] = saved_words[hashed_sub[hash_sub][0]][hashed_sub[hash_sub][1]]
-                        continue
-                    hashed_sub[hash_sub] = (key, subkey)
+    YAML_INDENT = 2
 
-        with open(__words_file, mode='w', encoding='utf-8') as wordsout:
-            yaml.dump(saved_words, wordsout, indent=2, allow_unicode=True)
+    def __init__(self, name: str):
+        self.__filename = name + '.yaml'
+        self.__inmem: NestedDict = dict()
+        self.__cache: List[str] = list()
 
+        if os.path.isfile(self.__filename):
+            with open(self.__filename, mode='r', encoding='utf-8') as sin:
+                saved = yaml.load(sin, yaml.Loader)
+                if type(saved) == dict:
+                    self.__inmem = saved
 
-def init(db: WordDict):
-    if os.path.isfile(__words_file):
-        with open(__words_file, mode='r', encoding='utf-8') as wordsin:
-            saved_words = yaml.load(wordsin, yaml.Loader)
-            if type(saved_words) == dict:
-                db.input(saved_words)
+    def __setitem__(self, key: str, value: Union[NestedDict, str]):
+        self.__inmem[key] = value
+        self.__cache.append(key)
 
+    def __getitem__(self, key: str) -> Union[NestedDict, str]:
+        return self.__inmem[key]
 
-def save(db: WordDict, *, to_compress: bool = True):
-    with open(__words_file, mode='a', encoding='utf-8') as wordsout:
-        cache = db.flush()
-        if cache is not None:
-            yaml.dump(cache, wordsout, indent=2, allow_unicode=True)
-    if to_compress:
-        yaml_compress()
+    def __delitem__(self, key: str):
+        if key in self.__cache:
+            del self.__cache[key]
+        del self.__inmem[key]
+
+    def __iter__(self) -> Iterator[str]:
+        return self.__inmem.__iter__()
+
+    def __len__(self) -> int:
+        return self.__inmem.__len__()
+
+    def items(self):
+        return self.__inmem.items()
+
+    def keys(self):
+        return self.__inmem.keys()
+
+    async def flush(self):
+        if len(self.__cache) != 0:
+            with open(self.__filename, mode='a', encoding='utf-8') as sout:
+                appendix = map(lambda word: (word, copy(self.__inmem[word])), self.__cache)
+                await asyncio.to_thread(yaml.dump, dict(appendix), sout, indent=DbYaml.YAML_INDENT, allow_unicode=True)
+            self.__cache.clear()
+
+    async def save(self):
+        if len(self.__inmem) != 0:
+            with open(self.__filename, mode='w', encoding='utf-8') as sout:
+                await asyncio.to_thread(yaml.dump, self.__inmem, sout, indent=DbYaml.YAML_INDENT, allow_unicode=True)
